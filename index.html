@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
   
   <style>
     :root {
@@ -505,13 +506,26 @@
   </main>
 
   <script>
-  // --- LODTRÆKNING FUNCTION ---
+  // Opret konfetti-maskine
+  const jsConfetti = new JSConfetti();
+
+  // Hent gemte navne når siden indlæses
+  document.addEventListener("DOMContentLoaded", function() {
+    const savedNames = localStorage.getItem('loge_members');
+    if (savedNames && document.getElementById('member-names')) {
+      document.getElementById('member-names').value = savedNames;
+    }
+  });
+
+  // --- ANIMERET LODTRÆKNING FUNCTION ---
   function pickOrganizers() {
     const input = document.getElementById('member-names').value;
     const resultDiv = document.getElementById('draw-result');
     const winnersDisplay = document.getElementById('winners-display');
 
-    // Lav teksten om til en liste af navne
+    // Gem listen på mobilen
+    localStorage.setItem('loge_members', input);
+
     let names = input.split(',').map(name => name.trim()).filter(name => name.length > 0);
 
     if (names.length < 2) {
@@ -519,26 +533,59 @@
       return;
     }
 
-    // Skjul resultat og vis animation
     resultDiv.style.display = 'block';
-    winnersDisplay.style.opacity = '0.5';
-    winnersDisplay.innerText = "Finder de heldige...";
 
-    // 1 sekunds forsinkelse for spændingens skyld
-    setTimeout(() => {
-      // Blanding af array (Fisher-Yates shuffle)
-      for (let i = names.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [names[i], names[j]] = [names[j], names[i]];
+    // 1. TROMMEHVIRVEL ANIMATION (Navnene skifter hurtigt)
+    let counter = 0;
+    const interval = setInterval(() => {
+      const rand1 = names[Math.floor(Math.random() * names.length)];
+      let rand2 = names[Math.floor(Math.random() * names.length)];
+      
+      // Sørg for to forskellige navne under animationen
+      while (rand1 === rand2 && names.length > 1) {
+        rand2 = names[Math.floor(Math.random() * names.length)];
       }
 
-      // Vælg de første 2
-      const organizer1 = names[0];
-      const organizer2 = names[1];
+      winnersDisplay.style.opacity = '0.6';
+      winnersDisplay.innerHTML = `🎲 ${rand1} & ${rand2}`;
+      counter++;
 
-      winnersDisplay.style.opacity = '1';
-      winnersDisplay.innerHTML = `👑 ${organizer1} & ${organizer2}`;
-    }, 800);
+      // Efter 15 skift (ca. 1.5 sekund) stopper den og finder den rigtige vinder
+      if (counter > 15) {
+        clearInterval(interval);
+        finalizeDraw(names);
+      }
+    }, 100);
+  }
+
+  function finalizeDraw(names) {
+    const winnersDisplay = document.getElementById('winners-display');
+
+    // Blanding af array (Fisher-Yates shuffle)
+    for (let i = names.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [names[i], names[j]] = [names[j], names[i]];
+    }
+
+    const organizer1 = names[0];
+    const organizer2 = names[1];
+
+    // Vis vinderne med brag
+    winnersDisplay.style.opacity = '1';
+    winnersDisplay.innerHTML = `👑 ${organizer1} & ${organizer2} 👑`;
+
+    // 2. SKYD GULD-KONFETTI OG EMOJIS AFSTED!
+    jsConfetti.addConfetti({
+      emojis: ['👑', '🎲', '🍻', '✨'],
+      emojiSize: 35,
+      confettiNumber: 40,
+    });
+
+    jsConfetti.addConfetti({
+      confettiColors: ['#d4af37', '#f3e5ab', '#ffffff', '#aa820a'],
+      confettiRadius: 6,
+      confettiNumber: 100,
+    });
   }
     
     // --- KONFIGURATION ---
