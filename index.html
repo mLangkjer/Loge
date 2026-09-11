@@ -294,6 +294,7 @@
     <button class="nav-btn active" onclick="showSection('events', event)">Arrangementer</button>
     <button class="nav-btn" onclick="showSection('rules', event)">Regler</button>
     <button class="nav-btn" onclick="showSection('hall-of-fame', event)">Årlige Lege (Vindere)</button>
+    <button class="nav-btn" onclick="showSection('randomizer', event)">Træk Arrangører</button>
   </nav>
 
   <!-- MAIN CONTENT -->
@@ -474,9 +475,72 @@
       
     </section>
 
+    <!-- SEKTION 4: RANDOMIZER -->
+<section id="randomizer" class="section">
+  <h2 style="margin-bottom: 20px;">🎲 Træk Næste Arrangører</h2>
+
+  <div class="card" style="text-align: center;">
+    <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.95rem;">
+      Indtast medlemmernes navne adskilt af komma:
+    </p>
+    
+    <input type="text" id="member-names" class="input-field" 
+           value="Mathias, Peter, Mikkel, Christian" 
+           style="max-width: 500px; margin: 0 auto 15px auto; text-align: center;">
+
+    <button onclick="pickOrganizers()" class="btn-gold" style="max-width: 250px; margin: 0 auto;">
+      🎲 Træk 2 Arrangører
+    </button>
+
+    <!-- RESULTAT VISES HER -->
+    <div id="draw-result" style="margin-top: 25px; display: none;">
+      <h3 style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">DE UDVALGTE ER:</h3>
+      <div id="winners-display" style="font-size: 1.5rem; font-weight: bold; color: var(--gold-primary); font-family: 'Cinzel', serif;">
+        ...
+      </div>
+    </div>
+  </div>
+</section>
+
   </main>
 
   <script>
+  // --- LODTRÆKNING FUNCTION ---
+  function pickOrganizers() {
+    const input = document.getElementById('member-names').value;
+    const resultDiv = document.getElementById('draw-result');
+    const winnersDisplay = document.getElementById('winners-display');
+
+    // Lav teksten om til en liste af navne
+    let names = input.split(',').map(name => name.trim()).filter(name => name.length > 0);
+
+    if (names.length < 2) {
+      alert("Indtast venligst mindst 2 navne!");
+      return;
+    }
+
+    // Skjul resultat og vis animation
+    resultDiv.style.display = 'block';
+    winnersDisplay.style.opacity = '0.5';
+    winnersDisplay.innerText = "Finder de heldige...";
+
+    // 1 sekunds forsinkelse for spændingens skyld
+    setTimeout(() => {
+      // Blanding af array (Fisher-Yates shuffle)
+      for (let i = names.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [names[i], names[j]] = [names[j], names[i]];
+      }
+
+      // Vælg de første 2
+      const organizer1 = names[0];
+      const organizer2 = names[1];
+
+      winnersDisplay.style.opacity = '1';
+      winnersDisplay.innerHTML = `👑 ${organizer1} & ${organizer2}`;
+    }, 800);
+  }
+    
     // --- KONFIGURATION ---
     const LOGE_PASSWORD = "1234"; // Ændr dette kodeord
 
