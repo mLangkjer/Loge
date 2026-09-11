@@ -550,8 +550,8 @@
       winnersDisplay.innerHTML = `🎲 ${rand1} & ${rand2}`;
       counter++;
 
-      // Efter 15 skift (ca. 1.5 sekund) stopper den og finder den rigtige vinder
-      if (counter > 15) {
+      // Efter 30 skift (ca. 3 sekund) stopper den og finder den rigtige vinder
+      if (counter > 30) {
         clearInterval(interval);
         finalizeDraw(names);
       }
